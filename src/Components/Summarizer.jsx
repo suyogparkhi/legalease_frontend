@@ -1,66 +1,76 @@
-import { useEffect, useState } from 'react';
-import { Upload, FileText } from 'lucide-react';
-import { useFirebase } from '../Context/firebase';
+import { useEffect, useState } from 'react'
+import { Upload, FileText, X } from 'lucide-react'
+import { useFirebase } from '../Context/firebase'
 
 export default function Summarizer() {
-  const firebase = useFirebase();
-  const [documents, setDocuments] = useState([]);
-  const [file, setFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [summary,setSummary] = useState('Click to generate summary')
+  const firebase = useFirebase()
+  const [documents, setDocuments] = useState([])
+  const [file, setFile] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [summary, setSummary] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedDocument, setSelectedDocument] = useState(null)
 
   const fetchDocuments = async () => {
     try {
-      const docs = await firebase.fetchingDocuments();
-      setDocuments(Array.isArray(docs) ? docs : []);
-      console.log(docs); // Log the fetched documents
+      const docs = await firebase.fetchingDocuments()
+      setDocuments(Array.isArray(docs) ? docs : [])
+      console.log(docs)
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error('Error fetching documents:', error)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchDocuments();
-  }, []);
+    fetchDocuments()
+  }, [])
 
   const handleUploadDocuments = async () => {
     if (file) {
-      setIsUploading(true);
+      setIsUploading(true)
       try {
-        await firebase.uploadDocuments(file);
-        console.log("File uploaded successfully!");
-        await fetchDocuments();
-        setFile(null);
+        await firebase.uploadDocuments(file)
+        console.log("File uploaded successfully!")
+        await fetchDocuments()
+        setFile(null)
       } catch (error) {
-        console.error('Error uploading documents:', error);
+        console.error('Error uploading documents:', error)
       } finally {
-        setIsUploading(false);
+        setIsUploading(false)
       }
     } else {
-      console.log("No file selected.");
+      console.log("No file selected.")
     }
-  };
+  }
 
-  const generateSummary = async (docURL) => {
-    console.log(`Generating summary for document ID: ${docURL}`);
+  const generateSummary = async (docURL, fileName) => {
+    console.log("Generating summary for document: ${fileName}")
+    setSelectedDocument(fileName)
+    setSummary('Generating summary...')
+    setIsModalOpen(true)
 
-    const response = await fetch('https://legalease-navy.vercel.app/summarizer', {
-      method: 'POST',
-      headers: {'Content-Type' : 'application/json'},
-      body: JSON.stringify({docURL}),
-    });
+    try {
+      const response = await fetch("https://legalease-navy.vercel.app/summarizer", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({docURL}),
+      })
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error generating summary:', errorData);
-        setSummary(`Error: ${errorData.detail}`); // Display the error message
-        return;
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error('Error generating summary:', errorData)
+        setSummary("Error: ${errorData.detail}")
+        return
+      }
+
+      const data = await response.json()
+      console.log(data)
+      setSummary(data['summary'])
+    } catch (error) {
+      console.error('Error generating summary:', error)
+      setSummary('An error occurred while generating the summary.')
     }
-
-    const data = await response.json();
-    console.log(data);
-    setSummary(data['summary']);
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -91,7 +101,6 @@ export default function Summarizer() {
             </div>
           </div>
 
-          {/* Display uploaded documents in table format */}
           <div className="overflow-x-auto mt-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Uploaded Documents</h2>
             <table className="min-w-full divide-y divide-gray-200">
@@ -116,21 +125,37 @@ export default function Summarizer() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
-                        onClick={() => generateSummary(doc.downloadURL)}
+                        onClick={() => generateSummary(doc.downloadURL, doc.fileName)}
                         className="text-blue-600 hover:text-blue-900 focus:outline-none focus:underline"
                       >
                         Generate Summary
                       </button>
-                      <div>{summary && <p>Summary: {summary}</p>}</div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
         </div>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-gray-900">Summary for {selectedDocument}</h3>
+                <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              <div className="overflow-y-auto max-h-[60vh]">
+                <p className="text-gray-700 whitespace-pre-wrap">{summary}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  );
+  )
 }
