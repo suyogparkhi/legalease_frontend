@@ -19,7 +19,7 @@ export default function LandingPage() {
             </div>
             <div className="w-1/2">
               <img
-                src="/placeholder.svg"
+                src="/placeholder.jpeg"
                 alt="Legal professionals working"
                 width={600}
                 height={400}
