@@ -1,70 +1,113 @@
+import React, { useState } from 'react';
+import { useFirebase } from '../Context/firebase'; // Assuming firebase.jsx is in the same directory
+import { CheckCircle, FileText, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import { ref, getDownloadURL } from 'firebase/storage';
 
-import React, { useState } from 'react'
-import axios from 'axios'
-import { CheckCircle, FileText, Loader2 } from 'lucide-react'
-
-export default function DocumnetQnA() {
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [question, setQuestion] = useState('')
-  const [answer, setAnswer] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [uploadSuccess, setUploadSuccess] = useState(false)
-
-  const handleFileChange = (event) => {
-    if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0])
-      setUploadSuccess(true)
-      setTimeout(() => setUploadSuccess(false), 3000)
-    }
-  }
+export default function DocumentQnA() {
+  const { uploadDocuments } = useFirebase(); // Fetch Firebase functions
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileUploadStatus, setFileUploadStatus] = useState('');
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [pdfFile, setPdfFile] = useState(null);
+  const { getCurrentUser, storage } = useFirebase();
+  const currentUser = getCurrentUser();
 
   const handleQuestionChange = (event) => {
-    setQuestion(event.target.value)
-  }
+    setQuestion(event.target.value);
+  };
 
-  const handleSubmit = async () => {
-    if (!selectedFile || !question) {
-      alert("Please upload a PDF file and enter a question.")
-      return
+  const handleFileChange = async (event) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      setSelectedFile(file);
+      setPdfFile(file); // Set file for API use
+      setFileUploadStatus('Uploading...');
+      try {
+        await uploadDocuments(file); // Upload document to Firebase
+        setFileUploadStatus('Upload successful!');
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setFileUploadStatus('Upload failed. Try again.');
+      } finally {
+        setTimeout(() => setFileUploadStatus(''), 3000);
+      }
     }
-
-    const formData = new FormData()
-    formData.append('file', selectedFile)
-    formData.append('question', question)
-
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setAnswer(""); // Clear any previous answers
+  
+    // Use the Firebase context
+  
+    // Validate input
+    if (!pdfFile) {
+      alert("Please upload a valid PDF file.");
+      return;
+    }
+    if (!question.trim()) {
+      alert("Please enter a valid question.");
+      return;
+    }
+  
+    setLoading(true);
     try {
-      setLoading(true)
-      const response = await axios.post(`http://localhost:8000/doc-qna/ask_query`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      // Check if user is logged in
+      if (!currentUser) {
+        alert("Please login first");
+        return;
+      }
+  
+      // Get the download URL for the uploaded file
+      const storageRef = ref(storage, `documents/${currentUser.uid}/${pdfFile.name}`);
+      const downloadURL = await getDownloadURL(storageRef);
+  
+      const response = await axios.post(
+        `http://legalease-navy.vercel.app/doc-qna/ask_query`, 
+        {
+          pdf_url: downloadURL,
+          question: question
         },
-      })
-      setAnswer(response.data.answer)
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      setAnswer(response.data.answer);
     } catch (error) {
-      console.error("Error fetching answer:", error)
-      setAnswer("Error fetching answer. Please try again.")
+      console.error("Error fetching answer:", error);
+      setAnswer("Failed to fetch answer. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+  
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full">
         <h1 className="text-3xl font-bold text-center mb-8 text-indigo-700">Legal Document Q&A with AI</h1>
-        
         <div className="mb-6">
-          <label htmlFor="file-upload" className="cursor-pointer bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg border border-indigo-300 flex items-center justify-center transition duration-300">
+          <label
+            htmlFor="file-upload"
+            className="cursor-pointer bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg border border-indigo-300 flex items-center justify-center transition duration-300"
+          >
             <FileText className="mr-2" />
             {selectedFile ? 'Change PDF' : 'Upload PDF'}
           </label>
           <input id="file-upload" type="file" accept=".pdf" onChange={handleFileChange} className="hidden" />
         </div>
 
-        {uploadSuccess && (
-          <div className="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative flex items-center" role="alert">
+        {fileUploadStatus && (
+          <div className={`mb-6 px-4 py-3 rounded relative flex items-center ${fileUploadStatus.includes('successful') ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700'}`} role="alert">
             <CheckCircle className="mr-2" />
-            <span>PDF uploaded successfully!</span>
+            <span>{fileUploadStatus}</span>
           </div>
         )}
 
@@ -99,5 +142,5 @@ export default function DocumnetQnA() {
         )}
       </div>
     </div>
-  )
+  );
 }

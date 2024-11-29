@@ -128,7 +128,7 @@ export const FirebaseProvider = (props) => {
   }, []);
 
   return (
-    <FirebaseContext.Provider value={{ loginUserWithEmailAndPassword, signupUserWithEmailAndPassword, getCurrentUser, SignOut, uploadDocuments,fetchingDocuments }}>
+    <FirebaseContext.Provider value={{ loginUserWithEmailAndPassword, signupUserWithEmailAndPassword, getCurrentUser, SignOut, uploadDocuments,fetchingDocuments,storage }}>
       {props.children}
     </FirebaseContext.Provider>
   );
