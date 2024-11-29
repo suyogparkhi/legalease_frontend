@@ -66,7 +66,7 @@ export default function DocumentQnA() {
       const downloadURL = await getDownloadURL(storageRef);
   
       const response = await axios.post(
-        `http://localhost:8000/doc-qna/ask_query`, 
+        `https://legalease-backend-35ws.onrender.com/doc-qna/ask_query`, 
         {
           pdf_url: downloadURL,
           question: question

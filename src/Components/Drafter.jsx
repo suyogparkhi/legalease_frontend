@@ -68,7 +68,7 @@ function Drafter() {
 
     setLoading(true);
     try {
-      const response = await axios.post(`http://localhost:8000/drafter/generate_document`, {
+      const response = await axios.post(`https://legalease-backend-35ws.onrender.com/drafter/generate_document`, {
         case_details: caseDetails,
         ipc_sections: ipcSections.split(',').map(item => item.trim()),
       });
@@ -114,7 +114,7 @@ function Drafter() {
 
       // Export in selected format
       const response = await axios.post(
-        `http://localhost:8000/drafter/export_document?format=${exportFormat}`,
+        `https://legalease-backend-35ws.onrender.com/drafter/export_document?format=${exportFormat}`,
         { document_content: docContent },
         { responseType: 'blob' }
       );

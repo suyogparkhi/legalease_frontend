@@ -53,7 +53,7 @@ export default function Summarizer() {
 
     try {
       const response = await axios.post(
-        `http://localhost:8000/summarizer/`,
+        `https://legalease-backend-35ws.onrender.com/summarizer/`,
         { pdf_url },
         {
           headers: {

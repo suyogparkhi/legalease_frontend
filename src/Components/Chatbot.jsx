@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Send, PlusCircle, MessageSquare } from 'lucide-react'
 
-const API_BASE_URL = 'http://localhost:8000/chatbot' // Adjust this to your FastAPI server URL
-
 const LegalAssistantChat = () => {
   const [query, setQuery] = useState('')
   const [currentSessionId, setCurrentSessionId] = useState('')
@@ -16,7 +14,7 @@ const LegalAssistantChat = () => {
 
   const startNewChat = async () => {
     try {
-      const response = await axios.post(`http://localhost:8000/chatbot/new_chat`)
+      const response = await axios.post(`https://legalease-backend-35ws.onrender.com/chatbot/new_chat`)
       setCurrentSessionId(response.data.session_id)
       setChatHistory([])
     } catch (error) {
@@ -28,7 +26,7 @@ const LegalAssistantChat = () => {
     if (!query.trim()) return
 
     try {
-      const response = await axios.post(`http://localhost:8000/chatbot/process_query`, {
+      const response = await axios.post(`https://legalease-backend-35ws.onrender.com/chatbot/process_query`, {
         query: query,
         session_id: currentSessionId,
       })
@@ -40,7 +38,7 @@ const LegalAssistantChat = () => {
       setQuery('')
 
       // Save chat history
-      await axios.post(`http://localhost:8000/chatbot/save_chat/${currentSessionId}`, [
+      await axios.post(`https://legalease-backend-35ws.onrender.com/chatbot/save_chat/${currentSessionId}`, [
         ...chatHistory,
         newMessage,
         botResponse,
