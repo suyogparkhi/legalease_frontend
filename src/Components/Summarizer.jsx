@@ -50,7 +50,7 @@ export default function Summarizer() {
     setIsModalOpen(true)
 
     try {
-      const response = await fetch("https://legalease-navy.vercel.app/summarizer", {
+      const response = await fetch("https://legalease-les9qkyqz-suyogs-projects-1510df30.vercel.app/summarizer", {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({docURL}),

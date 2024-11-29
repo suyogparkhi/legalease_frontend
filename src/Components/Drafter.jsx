@@ -35,7 +35,7 @@ function Drafter() {
 
   const exportDocument = async () => {
     try {
-      const response = await axios.post("https://legalease-navy.vercel.app/drafter/export_document?format=${exportFormat}", {
+      const response = await axios.post("https://legalease-les9qkyqz-suyogs-projects-1510df30.vercel.app/drafter/export_document?format=${exportFormat}", {
         document_content: editedDocument || generatedDocument,
       });
       setMessage(response.data.message);
