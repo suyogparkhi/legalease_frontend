@@ -1,5 +1,5 @@
 [[redirects]]
-  from = "/summarizer"
+  from = "https://legalease-backend-35ws.onrender.com/summarizer"
   to = "https://legalease-backend-35ws.onrender.com/summarizer"
   status = 200
   force = true
