@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Send, PlusCircle, MessageSquare } from 'lucide-react'
 
-const API_BASE_URL = 'https://legalease-les9qkyqz-suyogs-projects-1510df30.vercel.app/chatbot' // Adjust this to your FastAPI server URL
+const API_BASE_URL = 'http://localhost:8000/chatbot' // Adjust this to your FastAPI server URL
 
 const LegalAssistantChat = () => {
   const [query, setQuery] = useState('')
@@ -16,7 +16,7 @@ const LegalAssistantChat = () => {
 
   const startNewChat = async () => {
     try {
-      const response = await axios.post("https://legalease-les9qkyqz-suyogs-projects-1510df30.vercel.app/chatbot/new_chat")
+      const response = await axios.post(`http://localhost:8000/chatbot/new_chat`)
       setCurrentSessionId(response.data.session_id)
       setChatHistory([])
     } catch (error) {
@@ -28,7 +28,7 @@ const LegalAssistantChat = () => {
     if (!query.trim()) return
 
     try {
-      const response = await axios.post("https://legalease-les9qkyqz-suyogs-projects-1510df30.vercel.app/chatbot/process_query", {
+      const response = await axios.post(`http://localhost:8000/chatbot/process_query`, {
         query: query,
         session_id: currentSessionId,
       })
@@ -40,7 +40,7 @@ const LegalAssistantChat = () => {
       setQuery('')
 
       // Save chat history
-      await axios.post("https://legalease-les9qkyqz-suyogs-projects-1510df30.vercel.app/chatbot/save_chat/${currentSessionId}", [
+      await axios.post(`http://localhost:8000/chatbot/save_chat/${currentSessionId}`, [
         ...chatHistory,
         newMessage,
         botResponse,
@@ -58,7 +58,7 @@ const LegalAssistantChat = () => {
 
   const loadChatHistory = async (sessionId) => {
     try {
-      const response = await axios.get("https://legalease-les9qkyqz-suyogs-projects-1510df30.vercel.app/chatbot/get_chat_history/${sessionId}")
+      const response = await axios.get(`http://localhost:8000/chatbot/get_chat_history/${sessionId}`)
       setChatHistory(response.data.chat_history)
       setCurrentSessionId(sessionId)
     } catch (error) {

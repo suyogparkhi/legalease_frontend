@@ -66,7 +66,7 @@ export default function DocumentQnA() {
       const downloadURL = await getDownloadURL(storageRef);
   
       const response = await axios.post(
-        `https://legalease-les9qkyqz-suyogs-projects-1510df30.vercel.app/doc-qna/ask_query`, 
+        `http://localhost:8000/doc-qna/ask_query`, 
         {
           pdf_url: downloadURL,
           question: question
