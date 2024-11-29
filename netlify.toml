@@ -1,10 +1,15 @@
-[[redirects]]
-  from = "https://legalease-backend-35ws.onrender.com/summarizer"
-  to = "https://legalease-backend-35ws.onrender.com/summarizer"
-  status = 200
-  force = true
-  headers = {X-From = "Netlify"}
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[[edge_functions]]
+  path = "/*"
+  function = "cors"
+
 [[headers]]
   for = "/*"
   [headers.values]
-    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Origin = "https://legalease-backend-35ws.onrender.com"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Credentials = "true"

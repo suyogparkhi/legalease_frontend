@@ -68,10 +68,20 @@ function Drafter() {
 
     setLoading(true);
     try {
-      const response = await axios.post(`https://legalease-backend-35ws.onrender.com/drafter/generate_document`, {
-        case_details: caseDetails,
-        ipc_sections: ipcSections.split(',').map(item => item.trim()),
-      });
+      const response = await axios.post(
+        `https://legalease-backend-35ws.onrender.com/drafter/generate_document`,
+        {
+          case_details: caseDetails,
+          ipc_sections: ipcSections.split(',').map(item => item.trim()),
+        },
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      
       setGeneratedDocument(response.data.document_content);
       setEditedDocument(response.data.document_content);
       setMessage('Document generated successfully');
@@ -116,7 +126,13 @@ function Drafter() {
       const response = await axios.post(
         `https://legalease-backend-35ws.onrender.com/drafter/export_document?format=${exportFormat}`,
         { document_content: docContent },
-        { responseType: 'blob' }
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          responseType: 'blob'
+        }
       );
 
       // Download the file

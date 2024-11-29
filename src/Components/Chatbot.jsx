@@ -14,7 +14,16 @@ const LegalAssistantChat = () => {
 
   const startNewChat = async () => {
     try {
-      const response = await axios.post(`https://legalease-backend-35ws.onrender.com/chatbot/new_chat`)
+      const response = await axios.post(
+        `https://legalease-backend-35ws.onrender.com/chatbot/new_chat`,
+        {},
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
       setCurrentSessionId(response.data.session_id)
       setChatHistory([])
     } catch (error) {
@@ -26,10 +35,19 @@ const LegalAssistantChat = () => {
     if (!query.trim()) return
 
     try {
-      const response = await axios.post(`https://legalease-backend-35ws.onrender.com/chatbot/process_query`, {
-        query: query,
-        session_id: currentSessionId,
-      })
+      const response = await axios.post(
+        `https://legalease-backend-35ws.onrender.com/chatbot/process_query`,
+        {
+          query: query,
+          session_id: currentSessionId,
+        },
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
       const newMessage = { sender: 'Human', content: query }
       const botResponse = { sender: 'AI', content: response.data.response }
@@ -38,11 +56,16 @@ const LegalAssistantChat = () => {
       setQuery('')
 
       // Save chat history
-      await axios.post(`https://legalease-backend-35ws.onrender.com/chatbot/save_chat/${currentSessionId}`, [
-        ...chatHistory,
-        newMessage,
-        botResponse,
-      ])
+      await axios.post(
+        `https://legalease-backend-35ws.onrender.com/chatbot/save_chat/${currentSessionId}`,
+        [...chatHistory, newMessage, botResponse],
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
       // Update previous sessions
       setPreviousSessions((prev) => [

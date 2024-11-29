@@ -56,12 +56,12 @@ export default function Summarizer() {
         `https://legalease-backend-35ws.onrender.com/summarizer/`,
         { pdf_url },
         {
+          withCredentials: true,
           headers: {
             'Content-Type': 'application/json'
-          },
-          withCredentials: true
+          }
         }
-      )
+      );
 
       if (response.data && response.data.summary) {
         setSummary(response.data.summary)
